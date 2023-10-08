@@ -1,0 +1,80 @@
+FROM ubuntu:22.04
+
+# Arguments
+ARG USER=initial
+ARG GROUP=initial
+ARG UID=1000
+ARG GID=${UID}
+ARG SHELL=/bin/bash
+
+# Replace apt urls
+RUN sed -i 's@archive.ubuntu.com@ftp.jaist.ac.jp/pub/Linux@g' /etc/apt/sources.list
+
+# Update timezone
+RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+# Install packages
+RUN apt-get update &&  apt-get install -y --no-install-recommends \
+    wget curl ssh locales software-properties-common tzdata \
+    zsh terminator gnome-terminal git vim tig sudo \
+    dbus-x11 libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 \
+    curl gnupg2 lsb-release python3-pip vim wget build-essential ca-certificates
+
+# locale settings
+RUN locale-gen en_US en_US.UTF-8 \
+  && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
+  && add-apt-repository universe
+
+ENV LANG en_US.UTF-8
+ENV TZ=Asia/Tokyo
+
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+RUN apt update \
+  && DEBIAN_FRONTEND=noninteractive \
+  && apt install -y --no-install-recommends ros-humble-desktop python3-colcon-common-extensions \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Nvidia Container Toollit
+RUN distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | apt-key add - \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends nvidia-container-toolkit
+
+# Env vars for the nvidia-container-runtime.
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES graphics,utility,compute
+
+# Setup users and groups
+RUN groupadd --gid ${GID} ${GROUP} \
+  && useradd --gid ${GID} --uid ${UID} -ms ${SHELL} ${USER} \
+  && mkdir -p /etc/sudoers.d \
+  && echo "${USER}:x:${UID}:${UID}:${USER},,,:$HOME:${shell}" >> /etc/passwd \
+  && echo "${USER}:x:${UID}:" >> /etc/group \
+  && echo "${USER} ALL=(ALL) NOPASSWD: ALL" > "/etc/sudoers.d/${USER}" \
+  && chmod 0440 "/etc/sudoers.d/${USER}"
+
+# copy entrypoint
+COPY entrypoint.bash /entrypoint.bash
+RUN chmod 777 /entrypoint.bash
+
+# setup terminator config
+RUN mkdir -p /home/${USER}/.config/terminator
+COPY config/terminator/config /home/${USER}/.config/terminator
+RUN sudo chown -R ${USER}:${GROUP} /home/${USER}/.config
+
+# Switch user to ${USER}
+USER ${USER}
+
+# Make SSH available
+EXPOSE 22
+
+# Switch to user's HOME folder
+WORKDIR /home/${USER}
+
+# CMD ["terminator"]
+ENTRYPOINT ["/entrypoint.bash", "terminator"]

@@ -1,0 +1,31 @@
+version: "3"
+services:
+  ros2:
+    container_name: ros2-humble
+    image: ros2-humble
+    build:
+      context: .
+      args:
+        - USER=${USER}
+        - GROUP=${GROUP}
+        - UID=${UID}
+        - GID=${GID}
+    environment:
+      - DISPLAY=${DISPLAY}
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/.Xauthority/:/root/.Xauthority
+      - ${WORKSPACE_DIR}:${WORKSPACE_DIR}
+    devices:
+      - ${SERIAL_DEVICE}:${SERIAL_DEVICE}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    tty: true
+    user: "${UID}:${GID}"

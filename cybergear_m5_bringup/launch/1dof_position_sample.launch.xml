@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+<launch>
+  <arg name="serial_port" default="/dev/ttyACM0"/>
+  <arg name="baudrate" default="115200"/>
+  <arg name="frame_id" default="body"/>
+  <arg name="rate" default="200.0"/>
+  <arg name="enable_on_start" default="true"/>
+  <arg name="disable_on_end" default="true"/>
+
+  <!-- Launch cybergear m5 driver -->
+  <node pkg="cybergear_m5_driver" exec="cybergear_m5_bridge_node" output="screen">
+    <param name="serial_port" value="$(var serial_port)"/>
+    <param name="baudrate" value="$(var baudrate)"/>
+    <param name="frame_id" value="$(var frame_id)"/>
+    <param name="rate" value="$(var rate)"/>
+    <param name="enable_on_start" value="$(var enable_on_start)"/>
+    <param name="disable_on_end" value="$(var disable_on_end)"/>
+    <param from="$(find-pkg-share cybergear_m5_bringup)/config/1dof_position_sample.yaml"/>
+  </node>
+
+  <!-- Launch rviz for visualization -->
+  <include file="$(find-pkg-share cybergear_description)/launch/display.launch.xml">
+    <arg name="use_gui" value="true"/>
+  </include>
+</launch>

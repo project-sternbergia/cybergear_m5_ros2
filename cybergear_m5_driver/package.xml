@@ -4,9 +4,11 @@
   <name>cybergear_m5_driver</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="t_chiku@todo.todo">t_chiku</maintainer>
-  <license>TODO: License declaration</license>
+  <maintainer email="chikuta@todo.todo">t_chiku</maintainer>
+  <license>MIT</license>
 
+  <url type="bugtracker">https://github.com/project-sternbergia/cybergear_m5_ros2.git</url>
+  <url type="repository">https://github.com/project-sternbergia/cybergear_m5_ros2/issues</url>
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>

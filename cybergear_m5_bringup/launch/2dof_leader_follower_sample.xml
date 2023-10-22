@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+<launch>
+  <!-- Define arguments -->
+  <arg name="use_gui" default="true"/>
+  <arg name="description_pkg_name" default="cybergear_description"/>
+  <arg name="xacro_file_path" default="$(find-pkg-share $(var description_pkg_name))/urdf/cybergear.urdf.xacro"/>
+  <arg name="robot_description" default="$(command 'xacro $(var xacro_file_path)')"/>
+  <arg name="rviz_config_path" default="$(find-pkg-share $(var description_pkg_name))/rviz/rviz.rviz"/>
+
+  <!-- Launch URDF -->
+  <node pkg="robot_state_publisher" exec="robot_state_publisher" output="screen">
+    <param name="robot_description" value="$(var robot_description)"/>
+  </node>
+
+  <node pkg="rviz2" exec="rviz2" args="-d $(var rviz_config_path)">
+    <param name="robot_description" value="$(var robot_description)"/>
+  </node>
+
+  <group if="$(var use_gui)">
+    <node pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui" name="joint_state_publisher_gui" output="screen">
+      <remap from="joint_states" to="joint_command"/>
+    </node>
+  </group>
+</launch>

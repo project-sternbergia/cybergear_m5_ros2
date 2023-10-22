@@ -145,6 +145,60 @@ bool EnableRequestPacket::pack()
 }
 
 
+ResetRequestPacket::ResetRequestPacket(uint8_t id, uint8_t seq)
+  : RequestPacket(static_cast<uint8_t>(Type::Reset), id, PacketSize, seq)
+{}
+
+ResetRequestPacket::~ResetRequestPacket()
+{}
+
+// SetMechPosToZeroRequestPacket class
+SetMechPosToZeroRequestPacket::SetMechPosToZeroRequestPacket(uint8_t id, uint8_t seq)
+  : RequestPacket(static_cast<uint8_t>(Type::Reset), id, PacketSize, seq)
+{}
+
+// SetLimitSpeedRequestPacket class
+SetLimitSpeedRequestPacket::SetLimitSpeedRequestPacket(uint8_t id, float speed, uint8_t seq)
+  : RequestPacket(static_cast<uint8_t>(Type::SetLimitSpeed), id, PacketSize, seq)
+  , limit_speed_(std::max(std::min(speed, V_MAX), 0.0f))
+{}
+
+bool SetLimitSpeedRequestPacket::pack()
+{
+  if (!RequestPacket::pack()) return false;
+  memcpy(data_packet_.data(), &limit_speed_, sizeof(float));
+  data_packet_[4] = calc_checksum(data_packet_);
+  return true;
+}
+
+// SetLimitCurrentRequestPacket class
+SetLimitCurrentRequestPacket::SetLimitCurrentRequestPacket(uint8_t id, float current, uint8_t seq)
+  : RequestPacket(static_cast<uint8_t>(Type::SetLimitCurrent), id, PacketSize, seq)
+  , limit_current_(std::max(std::min(current, IQ_MAX), 0.0f))
+{}
+
+bool SetLimitCurrentRequestPacket::pack()
+{
+  if (!RequestPacket::pack()) return false;
+  memcpy(data_packet_.data(), &limit_current_, sizeof(float));
+  data_packet_[4] = calc_checksum(data_packet_);
+  return true;
+}
+
+// SetLimitTorqueRequestPacket class
+SetLimitTorqueRequestPacket::SetLimitTorqueRequestPacket(uint8_t id, float torque, uint8_t seq)
+  : RequestPacket(static_cast<uint8_t>(Type::SetLimitTorque), id, PacketSize, seq)
+  , limit_torque_(std::max(std::min(torque, T_MAX), 0.0f))
+{}
+
+bool SetLimitTorqueRequestPacket::pack()
+{
+  if (!RequestPacket::pack()) return false;
+  memcpy(data_packet_.data(), &limit_torque_, sizeof(float));
+  data_packet_[4] = calc_checksum(data_packet_);
+  return true;
+}
+
 // ControlPositionRequestPacket class
 ControlPositionRequestPacket::ControlPositionRequestPacket(uint8_t id, float position, uint8_t seq)
   : RequestPacket(static_cast<uint8_t>(Type::ControlPosition), id, PacketSize, seq)
@@ -200,11 +254,13 @@ bool ControlCurrentRequestPacket::pack()
 
 
 // ControlCurrentRequestPacket class
-ControlMotionRequestPacket::ControlMotionRequestPacket(uint8_t id, float position, float speed, float current, uint8_t seq)
+ControlMotionRequestPacket::ControlMotionRequestPacket(uint8_t id, float position, float speed, float current, float kp, float kd, uint8_t seq)
   : RequestPacket(static_cast<uint8_t>(Type::ControlCurrent), id, PacketSize, seq)
   , ref_position_(position)
   , ref_speed_(speed)
   , ref_current_(current)
+  , kp_(kp)
+  , kd_(kd)
 {}
 
 ControlMotionRequestPacket::~ControlMotionRequestPacket()
@@ -216,7 +272,9 @@ bool ControlMotionRequestPacket::pack()
   memcpy(data_packet_.data() + 0, &ref_position_, sizeof(float));
   memcpy(data_packet_.data() + 4, &ref_speed_, sizeof(float));
   memcpy(data_packet_.data() + 8, &ref_current_, sizeof(float));
-  data_packet_[12] = calc_checksum(data_packet_);
+  memcpy(data_packet_.data() + 12, &kp_, sizeof(float));
+  memcpy(data_packet_.data() + 16, &kd_, sizeof(float));
+  data_packet_[20] = calc_checksum(data_packet_);
   return true;
 }
 

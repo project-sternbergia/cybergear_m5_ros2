@@ -2,6 +2,7 @@
 #define CYBER_GEAR_M5_PAKCET_HH
 
 #include "cybergear_m5_driver/common.hh"
+#include "cybergear_m5_driver/cybergear_driver_defs.hh"
 #include <sys/types.h>
 #include <vector>
 #include <cstdint>
@@ -11,10 +12,10 @@ namespace cybergear_m5_driver
 
 enum class ControlMode
 {
-  POSITION,
-  VELOCITY,
-  CURRENT,
-  MOTION
+  Position = MODE_POSITION,
+  Velocity = MODE_SPEED,
+  Current = MODE_CURRENT,
+  Motion = MODE_MOTION
 };
 
 /**
@@ -23,9 +24,12 @@ enum class ControlMode
 class Packet
 {
 public:
-  static constexpr uint8_t Header = 0x89;
-  static constexpr uint8_t CommandPacketSize = 0x08;
+  static constexpr uint8_t Header = 0x89;               //!< Requeset / Response packet header
+  static constexpr uint8_t CommandPacketSize = 0x08;    //!< Command packet size
 
+  /**
+   * @brief Command packet index
+   */
   enum class CommandPacketIndex
   {
     FrameHeader = 0,
@@ -39,15 +43,24 @@ public:
     PacketSize
   };
 
+  /**
+   * @brief Construct a new Packet object
+   *
+   * @param type  packet type
+   * @param id    motor id
+   * @param size  packet size
+   */
   explicit Packet(uint8_t type, uint8_t id, uint16_t size) : type_(type), id_(id), size_(size){}
   virtual ~Packet() {}
+
+  // accessor
   uint8_t type() const { return type_; }
   uint8_t id() const { return id_; }
 
 private:
-  uint8_t type_;
-  uint8_t id_;
-  uint8_t size_;
+  uint8_t type_;      //!< packet type
+  uint8_t id_;        //!< motor can id
+  uint8_t size_;      //!< packet size
 };
 
 
@@ -59,20 +72,43 @@ class RequestPacket : public Packet
 public:
   enum class Type
   {
-    Enable = 0,
-    Reset,
-    GetMotorIdList,
-    GetControlMode,
-    ControlMotion,
-    ControlSpeed,
-    ControlPosition,
-    ControlCurrent,
+    Enable = 0,           //!< enable request packet type
+    Reset,                //!< reset request packet type
+    // GetMotorIdList,    //!< get motor id list packet type (not implemented)
+    // GetControlMode,    //!< get control mode packet type (not implemented)
+    ControlMotion,        //!< control motion request packet type
+    ControlSpeed,         //!< control speed request packet type
+    ControlPosition,      //!< control position request packet type
+    ControlCurrent,       //!< control current request packet type
+    SetMechPosToZero,     //!< set current mechanical encoder position to zero
+    // GetMotorParameter,
+    SetLimitSpeed,        //!< set limit speed
+    SetLimitCurrent,      //!< set limit current
+    SetLimitTorque,       //!< set limit torque
+    // SetCurrentParameter,
     _INVALID_TYPE_RANGE
   };
 
+  /**
+   * @brief Construct a new Request Packet object
+   *
+   * @param type  packet type
+   * @param id    motor can id
+   * @param size  packet size
+   * @param seq   sequence count (not use. for checking packet drop)
+   */
   RequestPacket(uint8_t type, uint8_t id, uint16_t size, uint8_t seq);
   virtual ~RequestPacket();
+
+  /**
+   * @brief Pack request pacekt
+   *
+   * @return true   success
+   * @return false  failed
+   */
   virtual bool pack();
+
+  // accessors
   const ByteArray & packet();
   const ByteArray &command_packet() const;
   const ByteArray &data_packet() const;
@@ -145,6 +181,78 @@ private:
 
 
 /**
+ * @brief ResetRequestPacket class
+ */
+class ResetRequestPacket : public RequestPacket
+{
+public:
+  static const int PacketSize = CommandPacketSize;
+  ResetRequestPacket(uint8_t id, uint8_t seq);
+  virtual ~ResetRequestPacket();
+};
+
+
+/**
+ * @brief SetMechPosToZeroRequestPacket class
+*/
+class SetMechPosToZeroRequestPacket : public RequestPacket
+{
+public:
+  static const int PacketSize = CommandPacketSize;
+  SetMechPosToZeroRequestPacket(uint8_t id, uint8_t seq);
+  virtual ~SetMechPosToZeroRequestPacket() {}
+};
+
+
+/**
+ * @brief SetLimitSpeedRequestPacket class
+*/
+class SetLimitSpeedRequestPacket : public RequestPacket
+{
+public:
+  static const int PacketSize = CommandPacketSize + 4 + 1;
+  SetLimitSpeedRequestPacket(uint8_t id, float speed, uint8_t seq);
+  virtual ~SetLimitSpeedRequestPacket() {}
+  virtual bool pack();
+
+private:
+  float limit_speed_;
+};
+
+
+/**
+ * @brief SetLimitCrrentRequestPacket class
+*/
+class SetLimitCurrentRequestPacket : public RequestPacket
+{
+public:
+  static const int PacketSize = CommandPacketSize + 4 + 1;
+  SetLimitCurrentRequestPacket(uint8_t id, float current, uint8_t seq);
+  virtual ~SetLimitCurrentRequestPacket() {}
+  virtual bool pack();
+
+private:
+  float limit_current_;
+};
+
+
+/**
+ * @brief SetLimitTorqueRequestPacket class
+*/
+class SetLimitTorqueRequestPacket : public RequestPacket
+{
+public:
+  static const int PacketSize = CommandPacketSize + 4 + 1;
+  SetLimitTorqueRequestPacket(uint8_t id, float torque, uint8_t seq);
+  virtual ~SetLimitTorqueRequestPacket() {}
+  virtual bool pack();
+
+private:
+  float limit_torque_;
+};
+
+
+/**
  * @brief ControlPositionRequestPacket class
  */
 class ControlPositionRequestPacket : public RequestPacket
@@ -161,6 +269,9 @@ private:
 };
 
 
+/**
+ * @brief ControlSpeedRequestePacket class
+ */
 class ControlSpeedRequestPacket : public RequestPacket
 {
 public:
@@ -175,6 +286,9 @@ private:
 };
 
 
+/**
+ * @brief ControlCurrentRequestPacket class
+ */
 class ControlCurrentRequestPacket : public RequestPacket
 {
 public:
@@ -189,24 +303,34 @@ private:
 };
 
 
+/**
+ * @brief ControlMotionRequestPacket class
+ */
 class ControlMotionRequestPacket : public RequestPacket
 {
 public:
-  static const int PacketSize = CommandPacketSize + 12 + 1;
-  explicit ControlMotionRequestPacket(uint8_t id, float position, float speed, float current, uint8_t seq);
+  static const int PacketSize = CommandPacketSize + 20 + 1;
+  explicit ControlMotionRequestPacket(uint8_t id, float position, float speed, float current, float kp, float kd, uint8_t seq);
   virtual ~ControlMotionRequestPacket();
   virtual bool pack();
   float ref_position() const { return ref_position_; }
   float ref_speed() const { return ref_speed_; }
   float ref_current() const { return ref_current_; }
+  float kp() const { return kp_; }
+  float kd() const { return kd_; }
 
 private:
   float ref_position_;
   float ref_speed_;
   float ref_current_;
+  float kp_;
+  float kd_;
 };
 
 
+/**
+ * @brief MotorStatusResponsePacket class
+ */
 class MotorStatusResponsePacket : public ResponsePacket
 {
 public:
@@ -215,7 +339,7 @@ public:
   virtual ~MotorStatusResponsePacket();
   virtual bool unpack();
   float position() const { return position_; }
-  float velocity() const { return position_; }
+  float velocity() const { return velocity_; }
   float effort() const { return effort_; }
   float tempareture() const { return tempareture_; }
 

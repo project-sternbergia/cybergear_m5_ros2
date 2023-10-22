@@ -3,24 +3,25 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <utility>
 
 
 using namespace cybergear_m5_driver;
 
 CyberGearM5Driver::CyberGearM5Driver()
   : receive_buffer_()
-  , motor_ids_()
-  , mode_(cybergear_m5_driver::ControlMode::POSITION)
+  , mode_(cybergear_m5_driver::ControlMode::Position)
   , receive_condition_mutex_()
   , receive_buffer_mutex_()
   , receive_process_cond_()
   , is_shutdown_(false)
+  , sequence_count_(0)
 {}
 
 CyberGearM5Driver::~CyberGearM5Driver()
 {}
 
-bool CyberGearM5Driver::init(const std::string& port, size_t baudrate, const Uint8Array & motor_ids, ControlMode mode)
+bool CyberGearM5Driver::init(const std::string& port, size_t baudrate)
 {
   // open seiral port
   {
@@ -37,7 +38,7 @@ bool CyberGearM5Driver::init(const std::string& port, size_t baudrate, const Uin
   return true;
 }
 
-bool CyberGearM5Driver::shutodwn()
+bool CyberGearM5Driver::shutdown()
 {
   is_shutdown_ = true;
   receive_process_cond_.notify_one();
@@ -54,18 +55,70 @@ bool CyberGearM5Driver::shutodwn()
   return true;
 }
 
-void CyberGearM5Driver::enable_motor(uint8_t id, uint8_t mode)
-{}
-
-void CyberGearM5Driver::disable_motor(uint8_t id)
-{}
-
-void CyberGearM5Driver::stop_motor(uint8_t id)
-{}
-
-void CyberGearM5Driver::control_motion(uint8_t id, float position, float velocity, float current)
+void CyberGearM5Driver::enable_motor(uint8_t id, ControlMode mode)
 {
- ControlMotionRequestPacket request(id, position, velocity, current, 0);
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  EnableRequestPacket request(id, static_cast<uint8_t>(mode), sequence_count_);
+  if (request.pack()) {
+    const ByteArray & packet = request.packet();
+    serial_->send_bytes(packet.data(), packet.size());
+  }
+}
+
+void CyberGearM5Driver::reset_motor(uint8_t id)
+{
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  ResetRequestPacket request(id, sequence_count_);
+  if (request.pack()) {
+    const ByteArray & packet = request.packet();
+    serial_->send_bytes(packet.data(), packet.size());
+  }
+}
+
+void CyberGearM5Driver::set_mech_position_to_zero(uint8_t id)
+{
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  SetMechPosToZeroRequestPacket request(id, sequence_count_);
+  if (request.pack()) {
+    const ByteArray & packet = request.packet();
+    serial_->send_bytes(packet.data(), packet.size());
+  }
+}
+
+void CyberGearM5Driver::set_limit_speed(uint8_t id, float speed)
+{
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  SetLimitSpeedRequestPacket request(id, speed, sequence_count_);
+  if (request.pack()) {
+    const ByteArray & packet = request.packet();
+    serial_->send_bytes(packet.data(), packet.size());
+  }
+}
+
+void CyberGearM5Driver::set_limit_current(uint8_t id, float current)
+{
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  SetLimitCurrentRequestPacket request(id, current, sequence_count_);
+  if (request.pack()) {
+    const ByteArray & packet = request.packet();
+    serial_->send_bytes(packet.data(), packet.size());
+  }
+}
+
+void CyberGearM5Driver::set_limit_torque(uint8_t id, float torque)
+{
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  SetLimitTorqueRequestPacket request(id, torque, sequence_count_);
+  if (request.pack()) {
+    const ByteArray & packet = request.packet();
+    serial_->send_bytes(packet.data(), packet.size());
+  }
+}
+
+void CyberGearM5Driver::control_motion(uint8_t id, float position, float velocity, float current, float kp, float kd)
+{
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  ControlMotionRequestPacket request(id, position, velocity, current, kp, kd, sequence_count_);
   if (request.pack()) {
     const ByteArray & packet = request.packet();
     serial_->send_bytes(packet.data(), packet.size());
@@ -74,7 +127,8 @@ void CyberGearM5Driver::control_motion(uint8_t id, float position, float velocit
 
 void CyberGearM5Driver::control_position(uint8_t id, float position)
 {
-  ControlPositionRequestPacket request(id, position, 0);
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  ControlPositionRequestPacket request(id, position, sequence_count_);
   if (request.pack()) {
     const ByteArray & packet = request.packet();
     serial_->send_bytes(packet.data(), packet.size());
@@ -83,7 +137,8 @@ void CyberGearM5Driver::control_position(uint8_t id, float position)
 
 void CyberGearM5Driver::control_velocity(uint8_t id, float velocity)
 {
-  ControlSpeedRequestPacket request(id, velocity, 0);
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  ControlSpeedRequestPacket request(id, velocity, sequence_count_);
   if (request.pack()) {
     const ByteArray & packet = request.packet();
     serial_->send_bytes(packet.data(), packet.size());
@@ -92,11 +147,19 @@ void CyberGearM5Driver::control_velocity(uint8_t id, float velocity)
 
 void CyberGearM5Driver::control_current(uint8_t id, float current)
 {
-  ControlCurrentRequestPacket request(id, current, 0);
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  ControlCurrentRequestPacket request(id, current, sequence_count_);
   if (request.pack()) {
     const ByteArray & packet = request.packet();
     serial_->send_bytes(packet.data(), packet.size());
   }
+}
+
+bool CyberGearM5Driver::get_motor_status(uint8_t id, MotorStatus & status) const
+{
+  if (motor_status_map_.find(id) == motor_status_map_.end()) return false;
+  status = motor_status_map_.at(id);
+  return true;
 }
 
 void CyberGearM5Driver::receive_callback(const uint8_t *buf, size_t len)
@@ -134,7 +197,7 @@ void CyberGearM5Driver::receive_data_process()
 
     // process next frame
     ByteArray frame;
-    if (get_next_frame(frame)) {
+    while (get_next_frame(frame)) {
       unpack_receive_packet(frame);
     }
   }

@@ -4,11 +4,11 @@
   <name>cybergear_m5</name>
   <version>0.0.1</version>
   <description>ROS 2 package suite of Cybergear</description>
-  <maintainer email="takeshi.chiku@gmail.com">Takeshi Chiku</maintainer>
+  <maintainer email="chikuta@todo.todo">chikuta</maintainer>
   <license>MIT</license>
 
-  <url type="bugtracker">https://github.com/project-sternbergia/cybergear_m5.git</url>
-  <url type="repository">https://github.com/project-sternbergia/cybergear_m5/issues</url>
+  <url type="bugtracker">https://github.com/project-sternbergia/cybergear_m5_ros2.git</url>
+  <url type="repository">https://github.com/project-sternbergia/cybergear_m5_ros2/issues</url>
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>cybergear_m5_driver</exec_depend>

@@ -1,0 +1,7 @@
+/cybergear_m5_bridge_node:
+  ros__parameters:
+    motors:
+      names: [motor_joint]
+      motor_joint:
+        id: 0x7F
+        mode: position

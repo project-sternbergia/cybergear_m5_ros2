@@ -2,6 +2,9 @@
 
 ROS2 package for Xiaomi Cybergear.
 
+> [!WARNING]  
+> Xiaomi Cybergear can generate high torque, so please make control parameter adjustments at your own risk.
+
 ## Dev Environments
 
 * Host OS
@@ -21,7 +24,7 @@ This docker container contains ros2-humble and necessary software to launch samp
 ```bash
 cd docker
 
-# please check follow env vairables at this script.
+# please check and modify follow env vairables at this script.
 # WORKSPACE_DIR ... mount diretory
 # SERIAL_DEVICE ... serial device name
 bash generate_env.bash
@@ -60,7 +63,7 @@ Please refer [cyberger_m5](https://github.com/project-sternbergia/cybergear_m5) 
 
 ### rviz2 samples (joint_state_publisher_gui samples)
 
-If you want to test simple sample, execute follow commands.
+Please test simple sample code.
 
 ```bash
 cd $COLCON_WS
@@ -68,12 +71,21 @@ source install/setup.bash
 
 # 1dof cybergear position control sample
 # you control cybergear via joint_state_publisher_gui
+# cybergear can id : 0x7F
 ros2 launch cybergear_m5_bringup 1dof_position_sample.launch.xml
 
 # 2dof cybergear position control sample
 # you control cybergear via joint_state_publisher_gui
-ros2 launch cybergear_m5_bringup 1dof_position_sample.launch.xml
+# cybergear_1 can id : 0x7F
+# cybergear_2 can id : 0x7E
+ros2 launch cybergear_m5_bringup 2dof_position_sample.launch.xml
 ```
+
+If you want to change control parameter, please check config file at `cybergear_m5_description/config` directory.
+
+`2dof_position_sample.launch.xml`
+
+![cybergear_ros2_bridge_example](docs/img/cybergear_ros2_bridge_sample.gif)
 
 ## LICENSE
 

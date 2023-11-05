@@ -1,52 +1,54 @@
 <?xml version="1.0"?>
 <robot name="cybergear" xmlns:xacro="http://www.ros.org/wiki/xacro" >
-  <link name="body">
-    <visual>
+  <xacro:macro name="cybergear" params="prefix">
+    <link name="${prefix}outer_body">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://cybergear_description/meshes/cybergear_outer_body.stl"/>
+        </geometry>
+        <material name="gray">
+          <color rgba="0.8 0.8 0.8 1.0"/>
+        </material>
+      </visual>
+    </link>
+
+    <link name="${prefix}inner_body">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://cybergear_description/meshes/cybergear_inner_body.stl"/>
+        </geometry>
+        <material name="gray">
+          <color rgba="0.8 0.8 0.8 1.0"/>
+        </material>
+      </visual>
+    </link>
+
+    <link name="${prefix}arm">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://cybergear_description/meshes/arm110.stl"/>
+        </geometry>
+        <material name="gray">
+          <color rgba="0.8 0.8 0.8 1.0"/>
+        </material>
+      </visual>
+    </link>
+
+    <joint name="${prefix}joint" type="revolute">
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://cybergear_description/meshes/cybergear_outer_body.stl"/>
-      </geometry>
-      <material name="gray">
-        <color rgba="0.8 0.8 0.8 1.0"/>
-      </material>
-    </visual>
-  </link>
+      <axis xyz="1 0 0"/>
+      <parent link="${prefix}outer_body"/>
+      <child link="${prefix}inner_body"/>
+      <limit lower="-1.5" upper="1.5" effort="0" velocity="0"/>
+    </joint>
 
-  <link name="inner_body">
-    <visual>
+    <joint name="${prefix}inner_body_arm_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://cybergear_description/meshes/cybergear_inner_body.stl"/>
-      </geometry>
-      <material name="gray">
-        <color rgba="0.8 0.8 0.8 1.0"/>
-      </material>
-    </visual>
-  </link>
-
-  <link name="arm">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://cybergear_description/meshes/arm110.stl"/>
-      </geometry>
-      <material name="gray">
-        <color rgba="0.8 0.8 0.8 1.0"/>
-      </material>
-    </visual>
-  </link>
-
-  <joint name="motor_joint" type="revolute">
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <axis xyz="1 0 0"/>
-    <parent link="body"/>
-    <child link="inner_body"/>
-    <limit lower="-1.5" upper="1.5" effort="0" velocity="0"/>
-  </joint>
-
-  <joint name="inner_body_arm_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
-    <parent link="inner_body"/>
-    <child link="arm"/>
-  </joint>
+      <parent link="${prefix}inner_body"/>
+      <child link="${prefix}arm"/>
+    </joint>
+  </xacro:macro>
 </robot>

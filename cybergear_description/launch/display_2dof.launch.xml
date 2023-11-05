@@ -6,6 +6,7 @@
   <arg name="xacro_file_path" default="$(find-pkg-share $(var description_pkg_name))/urdf/cybergear_2dof.urdf.xacro"/>
   <arg name="robot_description" default="$(command 'xacro $(var xacro_file_path)')"/>
   <arg name="rviz_config_path" default="$(find-pkg-share $(var description_pkg_name))/rviz/rviz.rviz"/>
+  <arg name="joint_states_name" default="joint_states"/>
 
   <!-- Launch URDF -->
   <node pkg="robot_state_publisher" exec="robot_state_publisher" output="screen">
@@ -18,8 +19,8 @@
 
   <group if="$(var use_gui)">
     <node pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui" name="joint_state_publisher_gui" output="screen">
-      <remap from="joint_states" to="joint_command"/>
       <param name="rate" value="100"/>
+      <remap from="joint_states" to="$(var joint_states_name)"/>
     </node>
   </group>
 </launch>

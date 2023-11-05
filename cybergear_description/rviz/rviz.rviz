@@ -66,21 +66,25 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        arm:
+        motor1_arm:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        body:
+        motor1_inner_body:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        inner_body:
+        motor1_outer_body:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
+        origin:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
       Mass Properties:
         Inertia: false
         Mass: false
@@ -92,7 +96,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: body
+    Fixed Frame: origin
     Frame Rate: 30
   Name: root
   Tools:
@@ -150,10 +154,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5153981447219849
+      Pitch: -0.15960176289081573
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.9403979182243347
+      Yaw: 2.8803982734680176
     Saved: ~
 Window Geometry:
   Displays:

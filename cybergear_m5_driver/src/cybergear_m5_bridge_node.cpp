@@ -19,10 +19,9 @@ struct MotorConfig
 {
   uint8_t id;                 //!< motor id
   ControlMode mode;           //!< control mode
-  float min_position_limit;   //!< min position limit
-  float max_position_limit;   //!< max position limit
-  float velocity_limit;       //!< velocity limit
-  float current_limit;        //!< current limit
+  float velocity_limit;       //!< velocity limit (max: 30 [rad/s])
+  float current_limit;        //!< current limit (max: 27 [A])
+  float torque_limit;         //!< torque limit (max: 12 [Nm])
 };
 
 
@@ -61,6 +60,9 @@ class CybeargearM5BridgeNode: public rclcpp::Node
       for (auto name : motor_names) {
         declare_parameter("motors." + name + ".id", 0x00);
         declare_parameter("motors." + name + ".mode", "position");
+        declare_parameter("motors." + name + ".velocity_limit", 1.0);
+        declare_parameter("motors." + name + ".current_limit", 1.0);
+        declare_parameter("motors." + name + ".torque_limit", 1.0);
       }
 
       // get parameters
@@ -74,6 +76,9 @@ class CybeargearM5BridgeNode: public rclcpp::Node
       for (auto name : motor_names) {
         MotorConfig config;
         config.id = get_parameter("motors." + name + ".id").as_int();
+        config.velocity_limit = get_parameter("motors." + name + ".velocity_limit").as_double();
+        config.current_limit = get_parameter("motors." + name + ".current_limit").as_double();
+        config.torque_limit = get_parameter("motors." + name + ".torque_limit").as_double();
 
         // get motor mode
         std::string mode = get_parameter("motors." + name + ".mode").as_string();
@@ -83,6 +88,7 @@ class CybeargearM5BridgeNode: public rclcpp::Node
         else if (mode == "current") config.mode = ControlMode::Current;
         else if (mode == "motion") config.mode = ControlMode::Motion;
         else config.mode = ControlMode::Position;
+
         motor_config_map_[name] = config;
         RCLCPP_INFO(get_logger(), "Load [%s] motor config. id [0x%02x] control mode : [%s]", name.c_str(), config.id, mode.c_str());
       }
@@ -108,6 +114,11 @@ class CybeargearM5BridgeNode: public rclcpp::Node
       // enable motors
       if (enable_on_start_) {
         for (auto const & [key, config] : motor_config_map_) {
+          RCLCPP_INFO(get_logger(), "Set motor limit [0x%02x] speed : [%f], current : [%f], torque [%f] .", config.id, config.velocity_limit, config.current_limit, config.torque_limit);
+          driver_->set_limit_speed(config.id, config.velocity_limit);
+          driver_->set_limit_current(config.id, config.current_limit);
+          driver_->set_limit_torque(config.id, config.torque_limit);
+
           RCLCPP_INFO(get_logger(), "Enable motor [0x%02x] in [%d] mode.", config.id, static_cast<int>(config.mode));
           driver_->enable_motor(config.id, config.mode);
         }

@@ -5,3 +5,6 @@
       motor1_joint:                         # select motor name from names tag
         id: 0x7F                            # cybergear can id (default cybergear can id is 0x7F)
         mode: position                      # select control mode when init motor (support position, velocity, current, motion)
+        velocity_limit: 4.0                 # set velocity limit (max value : 30 [rad/sec])
+        current_limit: 1.0                  # set current limit (max value : 27 [A])
+        torque_limit: 1.0                   # set torque limit (max value : 12 [Nm])

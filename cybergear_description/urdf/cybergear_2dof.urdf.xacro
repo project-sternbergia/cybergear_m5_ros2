@@ -6,12 +6,12 @@
 
   <link name="origin"/>
   <joint name="origin_to_motor1" type="fixed">
-    <origin xyz="-0.1 0 0" rpy="${pi} 0 ${-pi/2}"/>
+    <origin xyz="0.1 0 0" rpy="${pi} 0 ${-pi/2}"/>
     <parent link="origin"/>
     <child link="motor1_outer_body"/>
   </joint>
   <joint name="origin_to_motor2" type="fixed">
-    <origin xyz="0.1 0 0" rpy="${pi} 0 ${-pi/2}"/>
+    <origin xyz="-0.1 0 0" rpy="${pi} 0 ${-pi/2}"/>
     <parent link="origin"/>
     <child link="motor2_outer_body"/>
   </joint>

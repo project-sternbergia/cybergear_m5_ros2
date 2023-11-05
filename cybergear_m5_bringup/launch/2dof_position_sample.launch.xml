@@ -21,5 +21,6 @@
   <!-- Launch rviz for visualization -->
   <include file="$(find-pkg-share cybergear_description)/launch/display_2dof.launch.xml">
     <arg name="use_gui" value="true"/>
+    <arg name="joint_states_name" value="joint_command"/>
   </include>
 </launch>

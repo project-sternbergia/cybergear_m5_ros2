@@ -1,11 +1,10 @@
-/cybergear_m5_bridge_node:
-  ros__parameters:
-    motors:
-      names: [motor1_joint, motor2_joint]
-      motor1_joint:
-        id: 0x7F
-        mode: position
-      motor2_joint:
-        id: 0x7E
-        mode: position
-
+/cybergear_m5_bridge_node:                  # node name
+  ros__parameters:                          # define ros2 parameters
+    motors:                                 # configure motor section
+      names: [motor1_joint, motor2_joint]   # motor names
+      motor1_joint:                         # select motor name from names tag
+        id: 0x7F                            # cybergear can id (default cybergear can id is 0x7F)
+        mode: position                      # select control mode when init motor (support position, velocity, current, motion)
+      motor2_joint:                         # select motor name from names tag
+        id: 0x7E                            # 2nd motor can id
+        mode: position                      # 2nd motor control mode

@@ -129,6 +129,23 @@ public:
   void set_limit_torque(uint8_t id, float torque);
 
   /**
+   * @brief Set the control parameter. This control gain uses at pos control mode.
+   *
+   * @param id  motor can id
+   * @param kp  default value is 30 range = [0:200]
+   */
+  void set_position_control_gain(uint8_t id, float kp);
+
+  /**
+   * @brief Set the velocity parametr. This control gain uses at pos and vel control mode.
+   *
+   * @param id  motor can id
+   * @param kp  default value is 2 range = [0:200]
+   * @param kd  default value is 0.021 range = [0:200]
+   */
+  void set_velocity_control_gain(uint8_t id, float kp, float kd);
+
+  /**
    * @brief Control motor motion
    *
    * @param id        motor id

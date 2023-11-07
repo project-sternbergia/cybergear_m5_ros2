@@ -8,9 +8,15 @@
         velocity_limit: 4.0                 # set velocity limit (max value : 30 [rad/sec])
         current_limit: 1.0                  # set current limit (max value : 27 [A])
         torque_limit: 1.0                   # set torque limit (max value : 12 [Nm])
+        position_kp: 30.0                   # set position kp (default: 30.0)
+        velocity_kp: 2.0                    # set velocity kp (default: 2.0)
+        velocity_ki: 0.021                  # set velocity ki (default: 0.02)
       motor2_joint:                         # select motor name from names tag
         id: 0x7E                            # 2nd motor can id
         mode: position                      # 2nd motor control mode
         velocity_limit: 4.0                 # set velocity limit (max value : 30 [rad/sec])
         current_limit: 1.0                  # set current limit (max value : 27 [A])
         torque_limit: 1.0                   # set torque limit (max value : 12 [Nm])
+        position_kp: 30.0                   # set position kp (default: 30.0)
+        velocity_kp: 2.0                    # set velocity kp (default: 2.0)
+        velocity_ki: 0.021                  # set velocity ki (default: 0.02)

@@ -115,6 +115,26 @@ void CyberGearM5Driver::set_limit_torque(uint8_t id, float torque)
   }
 }
 
+void CyberGearM5Driver::set_position_control_gain(uint8_t id, float kp)
+{
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  SetPositionControlGainRequestPacket request(id, kp, sequence_count_);
+  if (request.pack()) {
+    const ByteArray & packet = request.packet();
+    serial_->send_bytes(packet.data(), packet.size());
+  }
+}
+
+void CyberGearM5Driver::set_velocity_control_gain(uint8_t id, float kp, float kd)
+{
+  sequence_count_ = (sequence_count_ + 1) % 256;
+  SetVelocityControlGainRequestPacket request(id, kp, kd, sequence_count_);
+  if (request.pack()) {
+    const ByteArray & packet = request.packet();
+    serial_->send_bytes(packet.data(), packet.size());
+  }
+}
+
 void CyberGearM5Driver::control_motion(uint8_t id, float position, float velocity, float current, float kp, float kd)
 {
   sequence_count_ = (sequence_count_ + 1) % 256;

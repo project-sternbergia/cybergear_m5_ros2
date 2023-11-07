@@ -1,10 +1,13 @@
 /cybergear_m5_bridge_node:                  # node name
   ros__parameters:                          # define ros2 parameters
     motors:                                 # configure motor section
-      names: [motor1_joint, motor2_joint]   # motor names
+      names: [motor1_joint]                 # motor names
       motor1_joint:                         # select motor name from names tag
         id: 0x7F                            # cybergear can id (default cybergear can id is 0x7F)
         mode: position                      # select control mode when init motor (support position, velocity, current, motion)
-        velocity_limit: 4.0                 # set velocity limit (max value : 30 [rad/sec])
-        current_limit: 1.0                  # set current limit (max value : 27 [A])
-        torque_limit: 1.0                   # set torque limit (max value : 12 [Nm])
+        velocity_limit: 30.0                # set velocity limit (max value : 30 [rad/sec])
+        current_limit: 10.0                 # set current limit (max value : 27 [A])
+        torque_limit: 10.0                  # set torque limit (max value : 12 [Nm])
+        position_kp: 30.0                   # set position kp (default: 30.0)
+        velocity_kp: 2.0                    # set velocity kp (default: 2.0)
+        velocity_ki: 0.021                  # set velocity ki (default: 0.02)

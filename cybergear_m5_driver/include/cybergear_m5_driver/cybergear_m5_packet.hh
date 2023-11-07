@@ -82,9 +82,11 @@ public:
     ControlCurrent,       //!< control current request packet type
     SetMechPosToZero,     //!< set current mechanical encoder position to zero
     // GetMotorParameter,
-    SetLimitSpeed,        //!< set limit speed
-    SetLimitCurrent,      //!< set limit current
-    SetLimitTorque,       //!< set limit torque
+    SetLimitSpeed,          //!< set limit speed
+    SetLimitCurrent,        //!< set limit current
+    SetLimitTorque,         //!< set limit torque
+    SetPositionControlGain, //!< set position control gain
+    SetVelocityControlGain, //!< set velocity control gain
     // SetCurrentParameter,
     _INVALID_TYPE_RANGE
   };
@@ -249,6 +251,33 @@ public:
 
 private:
   float limit_torque_;
+};
+
+
+class SetPositionControlGainRequestPacket : public RequestPacket
+{
+public:
+  static const int PacketSize = CommandPacketSize + 4 + 1;
+  SetPositionControlGainRequestPacket(uint8_t id, float kp, uint8_t seq);
+  virtual ~SetPositionControlGainRequestPacket() {}
+  virtual bool pack();
+
+private:
+  float kp_;
+};
+
+
+class SetVelocityControlGainRequestPacket : public RequestPacket
+{
+public:
+  static const int PacketSize = CommandPacketSize + 8 + 1;
+  SetVelocityControlGainRequestPacket(uint8_t id, float kp, float ki, uint8_t seq);
+  virtual ~SetVelocityControlGainRequestPacket() {}
+  virtual bool pack();
+
+private:
+  float kp_;
+  float ki_;
 };
 
 

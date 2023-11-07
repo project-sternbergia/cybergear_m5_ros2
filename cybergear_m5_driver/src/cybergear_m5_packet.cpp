@@ -199,6 +199,36 @@ bool SetLimitTorqueRequestPacket::pack()
   return true;
 }
 
+// SetPositionControlGainRequestPacket
+SetPositionControlGainRequestPacket::SetPositionControlGainRequestPacket(uint8_t id, float kp, uint8_t seq)
+  : RequestPacket(static_cast<uint8_t>(Type::SetPositionControlGain), id, PacketSize, seq)
+  , kp_(std::max(std::min(kp, 200.0f), 0.0f))
+{}
+
+bool SetPositionControlGainRequestPacket::pack()
+{
+  if (!RequestPacket::pack()) return false;
+  memcpy(data_packet_.data(), &kp_, sizeof(float));
+  data_packet_[4] = calc_checksum(data_packet_);
+  return true;
+}
+
+// SetVelocityControlGainRequestPacket
+SetVelocityControlGainRequestPacket::SetVelocityControlGainRequestPacket(uint8_t id, float kp, float ki, uint8_t seq)
+  : RequestPacket(static_cast<uint8_t>(Type::SetVelocityControlGain), id, PacketSize, seq)
+  , kp_(std::max(std::min(kp, 200.0f), 0.0f))
+  , ki_(std::max(std::min(ki, 200.0f), 0.0f))
+{}
+
+bool SetVelocityControlGainRequestPacket::pack()
+{
+  if (!RequestPacket::pack()) return false;
+  memcpy(data_packet_.data() + 0, &kp_, sizeof(float));
+  memcpy(data_packet_.data() + 4, &ki_, sizeof(float));
+  data_packet_[8] = calc_checksum(data_packet_);
+  return true;
+}
+
 // ControlPositionRequestPacket class
 ControlPositionRequestPacket::ControlPositionRequestPacket(uint8_t id, float position, uint8_t seq)
   : RequestPacket(static_cast<uint8_t>(Type::ControlPosition), id, PacketSize, seq)

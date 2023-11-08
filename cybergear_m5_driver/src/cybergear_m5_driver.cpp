@@ -1,4 +1,7 @@
 #include "cybergear_m5_driver/cybergear_m5_driver.hh"
+
+#define B2000000
+#include <async_comm/serial.h>
 #include <endian.h>
 #include <cstdint>
 #include <memory>

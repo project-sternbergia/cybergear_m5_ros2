@@ -19,7 +19,7 @@
 
   <group if="$(var use_gui)">
     <node pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui" name="joint_state_publisher_gui" output="screen">
-      <param name="rate" value="100"/>
+      <param name="rate" value="200"/>
       <remap from="joint_states" to="$(var joint_states_name)"/>
     </node>
   </group>

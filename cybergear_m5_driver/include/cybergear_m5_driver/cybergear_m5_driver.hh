@@ -1,7 +1,6 @@
 #ifndef CYBERGEAR_M5_DRIVER_HH
 #define CYBERGEAR_M5_DRIVER_HH
 
-#include <async_comm/serial.h>
 #include <cstdint>
 #include <type_traits>
 #include <unordered_map>

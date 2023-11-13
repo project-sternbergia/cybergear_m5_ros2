@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <launch>
   <arg name="serial_port" default="/dev/ttyACM0"/>
-  <arg name="baudrate" default="115200"/>
+  <arg name="baudrate" default="2000000"/>
   <arg name="frame_id" default="body"/>
   <arg name="rate" default="200.0"/>
   <arg name="enable_on_start" default="true"/>
